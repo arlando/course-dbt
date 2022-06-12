@@ -1,0 +1,12 @@
+version: 2
+
+models:
+  - name: stg_orders
+    description: Orders from users
+  - name: stg_users
+  - name: stg_promos
+  - name: stg_products
+  - name: stg_order_items
+  - name: stg_events
+  - name: stg_addresses
+    description: Users' addresses
