@@ -3,10 +3,344 @@ version: 2
 models:
   - name: stg_orders
     description: Orders from users
+    columns:
+      - name: order_id
+        description: The id of the order
+        tests:
+          - not_null
+          - unique
+      - name: user_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('users')
+              field: user_id
+      - name: address_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('addresses')
+              field: address_id
+      - name: created_at
+        tests:
+          - not_null
+      - name: status
+        tests:
+          - not_null
+
   - name: stg_users
+    description: Information about users
+    columns:
+      - name: user_id
+        description: The id of the user
+        tests:
+          - not_null
+          - unique
+      - name: first_name
+      - name: last_name
+      - name: email
+        tests:
+          - not_null
+      - name: created_at
+        tests:
+          - not_null
+      - name: address_id
+        tests:
+          - not_null
+          - unique
+          - relationships:
+              to: ref('addresses')
+              field: address_id
+
   - name: stg_promos
+    description: Product promotions
+    columns:
+      - name: promo_id
+        tests:
+          - not_null
+          - unique
+      - name: discount
+        tests:
+          - not_null
+          # TODO test GTE zero
+      - name: status
+        tests:
+          - not_null
+          - accepted_values: 
+              values: ['active', 'inactive']
+
   - name: stg_products
+    description: Products
+    columns:
+      - name: product_id
+        tests:
+          - not_null
+          - unique
+      - name: name
+        tests:
+          - not_null
+      - name: price
+        tests:
+          - not_null
+      - name: inventory
+        tests:
+          - not_null
+    
   - name: stg_order_items
+    description: Items in an order
+    columns:
+      - name: order_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('orders')
+              field: order_id
+      - name: product_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('products')
+              field: product_id
+      - name: quantity
+        tests:
+          - not_null
+  
   - name: stg_events
+    description: Events on the website i.e. page views, clicks, orders added to cart
+    columns:
+      - name: event_id
+        tests: 
+          - not_null
+          - unique
+      - name: session_id
+        tests:
+          - not_null
+      - name: user_id
+        tests:
+          - not_null
+      - name: page_url
+        tests:
+          - not_null
+      - name: created_at
+        tests:
+          - not_null
+      - name: event_type
+        tests:
+          - not_null
+      - name: order_id
+      - name: product_id
+
   - name: stg_addresses
     description: Users' addresses
+    columns:
+      - name: address_id
+        tests:
+          - not_null
+          - unique
+      - name: address
+        tests:
+          - not_null
+      - name: zipcode
+        tests:
+          - not_null
+      - name: state
+        tests: 
+          - not_null
+      - name: country
+        tests:
+          - not_null
+
+  # Marts
+
+  # Core
+  - name: int_orders
+    description: Orders intermediate table
+    columns:
+      - name: order_id 
+        tests:
+          - not_null
+          - unique
+      - name: status
+        tests:
+          - not_null
+      - name: user_id
+        tests:
+          - not_null
+  - name: int_users_addresses
+    description: Joined table of users too their addresses
+    columns:
+      - name: user_id
+        tests:
+          - not_null
+          - unique
+      - name: created_at
+        tests:
+          - not_null
+      - name: email
+        tests:
+          - not_null
+          - unique
+      - name: phone_number
+        tests:
+          - not_null
+          - unique
+      - name: address
+        tests:
+          - not_null
+      - name: zipcode
+        tests:
+          - not_null
+      - name: state
+        tests:
+          - not_null
+  - name: dim_products
+    description: Products from the website
+    columns:
+      - name: product_id
+        tests:
+          - not_null
+          - unique
+      - name: name
+        tests:
+          - not_null
+      - name: price_usd
+        tests:
+          - not_null
+      - name: inventory
+        tests:
+          - not_null
+  - name: dim_users
+    description: User dimension table joined with address
+    columns:
+      - name: user_id
+        tests:
+          - not_null
+          - unique
+      - name: created_at
+        tests:
+          - not_null
+      - name: email
+        tests:
+          - not_null
+          - unique
+      - name: phone_number
+        tests:
+          - not_null
+          - unique
+      - name: address
+        tests:
+          - not_null
+      - name: zipcode
+        tests:
+          - not_null
+      - name: state
+        tests:
+          - not_null
+      - name: country
+        tests:
+          - not_null
+  - name: fact_events
+    description: Website events i.e. page clicks, views, add to cart
+    columns:
+      - name: event_id
+        tests:
+          - not_null
+          - unique
+      - name: session_id
+        tests:
+          - not_null
+      - name: user_id
+        tests:
+          - not_null
+      - name: page_url
+        tests:
+          - not_null
+      - name: event_type
+        tests:
+          - not_null
+      - name: created_at
+        tests:
+          - not_null
+      - name: order_id
+        tests:
+          - relationships:
+              to: ref('orders')
+              field: order_id
+      - name: product_id
+        tests:
+          - relationships:
+              to: ref('products')
+              field: product_id
+  - name: fact_orders
+    description: Orders facts table
+    columns:
+      - name: order_id 
+        tests:
+          - not_null
+          - unique
+      - name: status
+        tests:
+          - not_null
+      - name: user_id
+        tests:
+          - not_null
+      - name: created_at
+        tests:
+          - not_null
+
+
+  # Marketing
+  - name: int_orders_order_items
+    description: Intermediate table joined with order items, products, orders
+    columns:
+      - name: product_id
+        tests:
+          - not_null
+      - name: order_id
+        tests:
+          - not_null
+      - name: quantity
+        tests:
+          - not_null
+      - name: name
+        tests:
+          - not_null
+      - name: created_at_utc
+        tests:
+          - not_null
+  - name: int_user_order_counts
+    description: Intermediate table showing how many orders a user has made
+    columns:
+      - name: user_id
+        tests:
+          - not_null
+          - unique
+      - name: num_purchases
+        tests:
+          - not_null
+  - name: fact_user_orders
+
+  # Product
+  - name: int_user_events
+    description: mapping of events to user names and address user_id
+  - name: fact_page_views
+    description: Map of page urls to number of times an event occured on the page
+    columns:
+      - name: page_url
+        tests:
+          - not_null
+          - unique
+      - name: num_views
+        tests:
+          - not_null
+  - name: fact_users_acquisition
+    description: Count of how many users joined during a particular hour
+    columns:
+      - name: hour
+        tests:
+          - not_null
+          - unique
+      - name: acquired_users
+        tests:
+          - not_null
+  - name: fact_user_events
