@@ -3,9 +3,9 @@
 Hello coursemate! Here are the answers to each of the week.
 
 - [Week 1](https://github.com/arlando/course-dbt/blob/main/greenery/22-W1-README.md)
-- [Week 2]
-- [Week 3]
-- [Week 4]
+- [Week 2](https://github.com/arlando/course-dbt/blob/main/greenery/22-W2-README.md)
+- [Week 3](https://github.com/arlando/course-dbt/blob/main/greenery/22-W3-README.md)
+- [Week 4](https://github.com/arlando/course-dbt/blob/main/greenery/22-W4-README.md)
 
 ---
 
